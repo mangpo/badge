@@ -16,21 +16,23 @@ def status():
     user_id = int(request.args['id'])
     loc = request.args['loc']
     # print user_id, loc
-    report_status(user_id,loc)
-  array = [random.randint(0,255) for i in xrange(64*3)]
-  return ','.join(str(x) for x in array)
+    return report_status(user_id,loc)
+  else:
+    array = [random.randint(0,255) for i in xrange(64*3)]
+    return ','.join(str(x) for x in array)
 
 
 @app.route('/badge', methods=['GET','POST'])
 def badge():
   print request.form
+  print request.args
+  if 'id' in request.args and 'badge' in request.form:
+    save_badge(int(request.args['id']),request.form['badge'])
   return """
   <!DOCTYPE html>
   <html>
   <body>
     <form  method="post">
-      ID:<br>
-      <input type="text" name="id"><br>
       Sequence of 64 x 3:<br>
       <input type="text" name="badge" size="100"><br>
       <input type="submit" value="Submit" name="submit">
