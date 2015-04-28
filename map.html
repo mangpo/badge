@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Map</title>
+    <title>Simple Map</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style>
@@ -16,18 +16,35 @@
 
 function initialize() {
   var myLatLng = $1;
-  var locations = myLatLng.map(
+  var myLocs = myLatLng.map(
     function f(x) { return new google.maps.LatLng(x[0],x[1]); });
+
+  var iconLatLng = $2;
+  var iconImages = [$3];
+  var iconLocs = iconLatLng.map(
+    function f(x) { return new google.maps.LatLng(x[0],x[1]); });
+
   var mapOptions = {
     zoom: 15,
-    center: locations[locations.length-1]
+    center: myLocs[myLocs.length-1]
   }
   var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-  for(var i=0; i<locations.length;i++) {
+  var path = new google.maps.Polyline({
+    path: myLocs,
+    geodesic: true,
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 2
+  });
+
+  path.setMap(map);
+
+  for(var i=0; i<iconLocs.length;i++) {
     marker = new google.maps.Marker({
-      position: locations[i],
-      map: map
+      position: iconLocs[i],
+      map: map ,
+      icon: iconImages[i]
   });
   }
                    
