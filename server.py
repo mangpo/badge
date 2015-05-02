@@ -8,6 +8,15 @@ app = Flask(__name__)
 setup()
 #public_dir = "../express-server/public/"
 
+@app.route('/restart', methods=['GET'])
+def restart():
+  print request.args
+  if 'id' in request.args:
+    user_id = int(request.args['id'])
+    return user_restart(user_id)
+  else:
+    return "Please specify user ID."
+
 @app.route('/status', methods=['GET'])
 def status():
   print 'args -------------'

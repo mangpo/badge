@@ -15,6 +15,13 @@ class User:
     self.queue = []
     self.generate_badge()
 
+  def restart(self):
+    if len(self.nearby) == 0:
+      return self.badge
+    else:
+      print "restart: send badge id = ", self.nearby[-1].user_id
+      return self.nearby[-1].badge
+
   def ping(self,datetime, loc, nearby_users, nearby_places):
     self.locations.append(loc)
     self.datetime = datetime
@@ -137,6 +144,12 @@ def report_status(user_id, gps):
   if not user in recent_users:
     recent_users.append(user)
   return user.ping(datetime, loc, nearby_users, nearby_places)
+
+def user_restart(user_id):
+  if not(user_id in id2user):
+    id2user[user_id] = User(user_id)
+  user = id2user[user_id]
+  return user.restart()
 
 def save_badge(user_id, badge):
   if not(user_id in id2user):
