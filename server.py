@@ -6,8 +6,9 @@ import random
 
 app = Flask(__name__)
 setup()
-#public_dir = "../express-server/public/"
 
+# Upon receiving /restart?id=<id>, server will send the last badge back to arduino.
+# If there is no nearby user or place so far, server will send the user's own badge.
 @app.route('/restart', methods=['GET'])
 def restart():
   print request.args
@@ -17,6 +18,11 @@ def restart():
   else:
     return "Please specify user ID."
 
+# Upon receiving GPS location, 
+#   server will send one badge if there is a new nearby user/place.
+#   If there is no new user, server will send "no new badge".
+# If either 'id' or 'loc' argument is not specified, 
+#   server will return random 64x3 integers.
 @app.route('/status', methods=['GET'])
 def status():
   print 'args -------------'
@@ -24,13 +30,12 @@ def status():
   if 'id' in request.args and 'loc' in request.args:
     user_id = int(request.args['id'])
     loc = request.args['loc']
-    # print user_id, loc
     return report_status(user_id,loc)
   else:
     array = [random.randint(0,255) for i in xrange(64*3)]
     return ','.join(str(x) for x in array)
 
-
+# Upload badge
 @app.route('/badge', methods=['GET','POST'])
 def badge():
   print request.form
@@ -52,6 +57,7 @@ def badge():
   </html>
   """
 
+# Upload personalized message
 @app.route('/message', methods=['GET','POST'])
 def message():
   print request.form

@@ -1,6 +1,10 @@
 from PIL import Image
 import random
 
+# User object represents either a user or a stationary place.
+# For staionary places, 
+#   - 'locations' field contains only one location.
+#   - 'nearby' and 'nearby_loc' fields are not used.
 class User:
   def __init__(self, user_id, \
                  message = "", \
@@ -15,6 +19,8 @@ class User:
     self.queue = []
     self.generate_badge()
 
+  # Send the last badge back to arduino.
+  # If there is no nearby user or place so far, server will send the user's own badge.
   def restart(self):
     if len(self.nearby) == 0:
       return self.badge
@@ -22,6 +28,10 @@ class User:
       print "restart: send badge id = ", self.nearby[-1].user_id
       return self.nearby[-1].badge
 
+  # 1) Update user's location.
+  # 2) Append nearby users and places to the nearby list, and add them to the queue.
+  # 3) Send the badge of the first user/place in the queue, 
+  #    and remove such user/place from the queue.
   def ping(self,datetime, loc, nearby_users, nearby_places):
     self.locations.append(loc)
     self.datetime = datetime
@@ -61,6 +71,7 @@ class User:
     f.close()
     print "save_badge: sucess!"
 
+  # Generate PNG
   def generate_badge(self):
     k = 5
     arr = [int(x) for x in self.badge.split(',')]
