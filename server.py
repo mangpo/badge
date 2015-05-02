@@ -25,14 +25,15 @@ def status():
 @app.route('/badge', methods=['GET','POST'])
 def badge():
   print request.form
-  print request.args
-  if 'id' in request.args and 'badge' in request.form:
-    save_badge(int(request.args['id']),request.form['badge'])
+  if 'id' in request.form and 'badge' in request.form:
+    save_badge(int(request.form['id']),request.form['badge'])
   return """
   <!DOCTYPE html>
   <html>
   <body>
     <form  method="post">
+      ID:<br>
+      <input type="text" name="id"><br>
       Sequence of 64 x 3:<br>
       <input type="text" name="badge" size="100"><br>
       <input type="submit" value="Submit" name="submit">
@@ -53,6 +54,8 @@ def message():
   <html>
   <body>
     <form  method="post">
+      ID:<br>
+      <input type="text" name="id"><br>
       Message:<br>
       <input type="text" name="message" size="50"><br>
       <input type="submit" value="Submit" name="submit">

@@ -45,7 +45,11 @@ class User:
 
   def save_badge(self,badge):
     self.badge = badge
-    self.generate_bage()
+    self.generate_badge()
+    f = open('db/' + str(self.user_id),'w')
+    f.write(self.badge)
+    f.close()
+    print "save_badge: sucess!"
 
   def generate_badge(self):
     k = 5
@@ -173,6 +177,8 @@ def get_map(user_id):
   else:
     return "user_id = %d not found" % (user_id)
 
+# Create stationary place by setting ID, badge, and location.
+# Note that we use User() for both users and places.
 def create_place(id, loc, badge, message):
   user = User(id, message, badge)
   id2user[id] = user
@@ -181,10 +187,14 @@ def create_place(id, loc, badge, message):
 
 def setup():
   print "set up..."
-  create_place(1001, [37.869973, -122.268111], ','.join(str(0) for x in xrange(64*3)), "Downtown Berkeley BART")
-  create_place(1002, [37.872049, -122.257838], ','.join(str(0) for x in xrange(64*3)), "Campanile")
-  create_place(1003, [37.874709, -122.258635], ','.join(str(0) for x in xrange(64*3)), "Invention Lab")
+  # Add stationary places from database "db/stationary.csv"
+  f = open('db/stationary.csv','r')
+  for row in f:
+    tokens = row.split(';')
+    create_place(int(tokens[0]), [float(tokens[2]),float(tokens[3])], tokens[4], tokens[1])
+  f.close()
 
+  # Hard code for users 1 & 2's paths
   print report_status(1,'$GPRMC,194119.000,A,3752.1984,N,12216.0867,W,2.03,221.11,260415,,,A*77') # BART
   print report_status(1,'$GPRMC,194219.000,A,3752.26366,N,12215.71874,W,2.03,221.11,260415,,,A*77')
   print report_status(1,'$GPRMC,194309.000,A,3752.3229,N,12215.4703,W,2.03,221.11,260415,,,A*77') # Campanile
@@ -192,6 +202,7 @@ def setup():
 
   print report_status(2,'$GPRMC,194520.000,A,3752.5482,N,12215.5005,W,2.03,221.11,260415,,,A*77')
   print report_status(1,'$GPRMC,194530.000,A,3752.5481,N,12215.5004,W,2.03,221.11,260415,,,A*77')
+
   # print report_status(2,'$GPRMC,194530.000,A,3752.5482,N,12215.7005,W,2.03,221.11,260415,,,A*77')
   # http://localhost:5001/status?id=2&loc=$GPRMC,194530.000,A,3752.5482,N,12215.7005,W,2.03,221.11,260415,,,A*77
   # http://localhost:5001/badge?id=2
