@@ -44,8 +44,11 @@ class User:
       return "no new badge"
 
   def save_badge(self,badge):
+    print "save_badge: id=", self.user_id
     self.badge = badge
+    print "generate PNG..."
     self.generate_badge()
+    print "save string..."
     f = open('db/' + str(self.user_id),'w')
     f.write(self.badge)
     f.close()
@@ -54,6 +57,7 @@ class User:
   def generate_badge(self):
     k = 5
     arr = [int(x) for x in self.badge.split(',')]
+    print "len = ", len(arr)
     pixels = [0 for x in xrange(8*8*k*k)]
     for i in xrange(64):
       color = (arr[3*i],arr[3*i+1],arr[3*i+2])

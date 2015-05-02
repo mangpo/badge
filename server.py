@@ -47,8 +47,8 @@ def badge():
 def message():
   print request.form
   print request.args
-  if 'id' in request.args and 'message' in request.form:
-    save_message(int(request.args['id']),request.form['message'])
+  if 'id' in request.form and 'message' in request.form:
+    save_message(int(request.form['id']),request.form['message'])
   return """
   <!DOCTYPE html>
   <html>
