@@ -2,28 +2,39 @@ from PIL import Image
 import random
 
 class User:
-  def __init__(self, user_id):
+  def __init__(self, user_id, \
+                 message = "", \
+                 badge = ','.join(str(random.randint(0,255)) for x in xrange(64*3))):
     self.locations = []
     self.datetime = None
     self.user_id = user_id
     self.nearby = []
     self.nearby_loc = []
-    self.badge = None
+    self.badge = badge
+    self.message = message
     self.queue = []
+    self.generate_badge()
 
-  def ping(self,datetime, loc, nearby):
+  def ping(self,datetime, loc, nearby_users, nearby_places):
     self.locations.append(loc)
     self.datetime = datetime
-    for user in nearby:
+    # handle nearby users
+    for user in nearby_users:
       if not (user.user_id == self.user_id) and not(user.user_id in self.nearby):
-        self.nearby.append(user.user_id)
+        self.nearby.append(user)
         self.nearby_loc.append(user.locations[-1])
         self.queue.append(user.badge)
-        user.nearby.append(self.user_id)
+        user.nearby.append(self)
         user.nearby_loc.append(self.locations[-1])
-        user.queue.append(self.badge)
-        # send badges one-by-one
+        user.queue.append(self.badge) # add to queue
 
+    # handle nearby places
+    for place in nearby_places:
+      self.nearby.append(place)
+      self.nearby_loc.append(place.locations[-1])
+      self.queue.append(place.badge)
+
+    # send one badge at a time
     if len(self.queue) > 0:
       print "send badge to user %d" % (self.user_id)
       tmp = self.queue[0]
@@ -33,9 +44,12 @@ class User:
       return "no new badge"
 
   def save_badge(self,badge):
-    k = 5
     self.badge = badge
-    arr = [int(x) for x in badge.split(',')]
+    self.generate_bage()
+
+  def generate_badge(self):
+    k = 5
+    arr = [int(x) for x in self.badge.split(',')]
     pixels = [0 for x in xrange(8*8*k*k)]
     for i in xrange(64):
       color = (arr[3*i],arr[3*i+1],arr[3*i+2])
@@ -48,7 +62,14 @@ class User:
     im.putdata(pixels)
     im.save('static/' + str(self.user_id) + '.png')
 
+  def save_message(self, message):
+    if isinstance(message, unicode):
+      self.message = message.encode('ascii')
+    else:
+      self.message = message
+
 recent_users = []
+stationary = []
 id2user = {}
 
 def parseGPS(x):
@@ -72,10 +93,10 @@ def filter_recent(users, datetime):
   for x_user in users:
     x_datetime = x_user.datetime
     if datetime[0] == x_datetime[0]:
-      if datetime[1] - x_datetime[1] < 100: # 1 minute
+      if datetime[1] - x_datetime[1] < 500: # 5 minutes
         ret.append(x_user)
     elif datetime[0] + 1 == x_datetime[0]:
-      if (246000 - datetime[1]) + x_datetime[1] < 100:
+      if (246000 - datetime[1]) + x_datetime[1] < 500:
         ret.append(x_user)
   return ret
 
@@ -94,16 +115,20 @@ def report_status(user_id, gps):
 
   if not(user_id in id2user):
     id2user[user_id] = User(user_id)
+  print ""
+  print "ID = ", user_id
   user = id2user[user_id]
   datetime, loc = parseGPS(gps)
   global recent_users
   recent_users = filter_recent(recent_users, datetime)
   nearby_users = filter_near(recent_users, loc)
+  nearby_places = filter_near(stationary, loc)
   print "recent_users = ", [x.user_id for x in recent_users]
   print "nearby_users = ", [x.user_id for x in nearby_users]
+  print "nearby_places = ", [x.user_id for x in nearby_places]
   if not user in recent_users:
     recent_users.append(user)
-  return user.ping(datetime, loc, nearby_users)
+  return user.ping(datetime, loc, nearby_users, nearby_places)
 
 def save_badge(user_id, badge):
   if not(user_id in id2user):
@@ -111,26 +136,62 @@ def save_badge(user_id, badge):
   user = id2user[user_id]
   user.save_badge(badge)
 
+def save_message(user_id, message):
+  if not(user_id in id2user):
+    id2user[user_id] = User(user_id)
+  user = id2user[user_id]
+  user.save_message(message)
+
+f = open('map.html','r')
+html = f.read()
+f.close()
+
+f = open('marker.js','r')
+marker = f.read()
+f.close()
+
+f = open('label.js','r')
+label = f.read()
+f.close()
+
 def get_map(user_id):
   if user_id in id2user:
     user = id2user[user_id]
-    f = open('map.html','r')
-    html = f.read()
-    f.close()
+
+    infos = ""
+    for i in xrange(len(user.nearby)):
+      infos = infos + marker.replace('$', str(i))
+      if not user.nearby[i].message == "":
+        infos = infos + label.replace('$', str(i))
+
     return html.replace('$1',str(user.locations))\
         .replace('$2',str(user.nearby_loc))\
-        .replace('$3', ','.join(['"/static/' + str(x) + '.png"' for x in user.nearby]))
+        .replace('$3', ','.join(['"/static/' + str(x.user_id) + '.png"' \
+                                   for x in user.nearby]))\
+        .replace('$4', str([x.message for x in user.nearby]))\
+        .replace('$R', infos)
   else:
     return "user_id = %d not found" % (user_id)
 
+def create_place(id, loc, badge, message):
+  user = User(id, message, badge)
+  id2user[id] = user
+  user.ping(None, loc, [], [])
+  stationary.append(user)
+
 def setup():
   print "set up..."
-  save_badge(1,','.join(str(random.randint(0,255)) for x in xrange(64*3)))
-  save_badge(2,','.join(str(0) for x in xrange(64*3)))
-  print report_status(1,'$GPRMC,194509.000,A,3752.2247,N,12216.0287,W,2.03,221.11,260415,,,A*77')
-  print report_status(1,'$GPRMC,194519.000,A,3752.3540,N,12215.6180,W,2.03,221.11,260415,,,A*77')
+  create_place(1001, [37.869973, -122.268111], ','.join(str(0) for x in xrange(64*3)), "Downtown Berkeley BART")
+  create_place(1002, [37.872049, -122.257838], ','.join(str(0) for x in xrange(64*3)), "Campanile")
+  create_place(1003, [37.874709, -122.258635], ','.join(str(0) for x in xrange(64*3)), "Invention Lab")
+
+  print report_status(1,'$GPRMC,194119.000,A,3752.1984,N,12216.0867,W,2.03,221.11,260415,,,A*77') # BART
+  print report_status(1,'$GPRMC,194219.000,A,3752.26366,N,12215.71874,W,2.03,221.11,260415,,,A*77')
+  print report_status(1,'$GPRMC,194309.000,A,3752.3229,N,12215.4703,W,2.03,221.11,260415,,,A*77') # Campanile
+  print report_status(1,'$GPRMC,194419.000,A,3752.4825,N,12215.5181,W,2.03,221.11,260415,,,A*77') # Invention Lab
+
   print report_status(2,'$GPRMC,194520.000,A,3752.5482,N,12215.5005,W,2.03,221.11,260415,,,A*77')
-  print report_status(1,'$GPRMC,194529.000,A,3752.5481,N,12215.5004,W,2.03,221.11,260415,,,A*77')
+  print report_status(1,'$GPRMC,194530.000,A,3752.5481,N,12215.5004,W,2.03,221.11,260415,,,A*77')
   # print report_status(2,'$GPRMC,194530.000,A,3752.5482,N,12215.7005,W,2.03,221.11,260415,,,A*77')
   # http://localhost:5001/status?id=2&loc=$GPRMC,194530.000,A,3752.5482,N,12215.7005,W,2.03,221.11,260415,,,A*77
   # http://localhost:5001/badge?id=2

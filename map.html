@@ -21,12 +21,13 @@ function initialize() {
 
   var iconLatLng = $2;
   var iconImages = [$3];
+  var messages = $4;
   var iconLocs = iconLatLng.map(
     function f(x) { return new google.maps.LatLng(x[0],x[1]); });
 
   var mapOptions = {
-    zoom: 15,
-    center: myLocs[myLocs.length-1]
+    zoom: 16,
+    center: myLocs[Math.floor(myLocs.length/2)]
   }
   var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
@@ -40,13 +41,7 @@ function initialize() {
 
   path.setMap(map);
 
-  for(var i=0; i<iconLocs.length;i++) {
-    marker = new google.maps.Marker({
-      position: iconLocs[i],
-      map: map ,
-      icon: iconImages[i]
-  });
-  }
+  $R
                    
 }
 

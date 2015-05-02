@@ -42,6 +42,25 @@ def badge():
   </html>
   """
 
+@app.route('/message', methods=['GET','POST'])
+def message():
+  print request.form
+  print request.args
+  if 'id' in request.args and 'message' in request.form:
+    save_message(int(request.args['id']),request.form['message'])
+  return """
+  <!DOCTYPE html>
+  <html>
+  <body>
+    <form  method="post">
+      Message:<br>
+      <input type="text" name="message" size="50"><br>
+      <input type="submit" value="Submit" name="submit">
+    </form>
+    
+  </body>
+  </html>
+  """
 
 @app.route('/map', methods=['GET'])
 def map():
