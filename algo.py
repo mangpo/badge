@@ -1,5 +1,5 @@
 from PIL import Image
-import random
+import random, time
 
 # User object represents either a user or a stationary place.
 # For staionary places, 
@@ -100,8 +100,6 @@ id2user = {}
 
 def parseGPS(x):
   tokens = x.split(',')
-  date = int(tokens[9][:2])
-  time = int(tokens[1][:6])
 
   latitude = tokens[3]
   latitude = int(latitude[:2]) + float(latitude[2:])/60.0
@@ -112,17 +110,26 @@ def parseGPS(x):
   longtitude = int(longtitude[:3]) + float(longtitude[3:])/60.0
   if tokens[6] == 'W':
     longtitude = -longtitude
-  return ([date, time], [latitude, longtitude])
+  return [latitude, longtitude]
 
+def get_datetime():
+  # d = 502 for 05/02
+  # t = 231801 for 23:18:01 hh:mm:ss
+  d = int(time.strftime("%d%m"))
+  t = int(time.strftime("%H%M%S"))
+  return [d,t]
+
+# Filter for users who ping the server less than 'min_limit' minutes ago.
+min_limit = 5
 def filter_recent(users, datetime):
   ret = []
   for x_user in users:
     x_datetime = x_user.datetime
     if datetime[0] == x_datetime[0]:
-      if datetime[1] - x_datetime[1] < 500: # 5 minutes
+      if datetime[1] - x_datetime[1] < min_limit * 100:
         ret.append(x_user)
     elif datetime[0] + 1 == x_datetime[0]:
-      if (246000 - datetime[1]) + x_datetime[1] < 500:
+      if (246000 - datetime[1]) - x_datetime[1] < min_limit * 100:
         ret.append(x_user)
   return ret
 
@@ -139,12 +146,15 @@ def report_status(user_id, gps):
     print "Invalid GPS data"
     return
 
+  update_user(user_id, parseGPS(gps)) # TODO
+
+def update_user(user_id,loc):
   if not(user_id in id2user):
     id2user[user_id] = User(user_id)
   print ""
   print "ID = ", user_id
   user = id2user[user_id]
-  datetime, loc = parseGPS(gps)
+  datetime = get_datetime() # TODO
   global recent_users
   recent_users = filter_recent(recent_users, datetime)
   nearby_users = filter_near(recent_users, loc)
@@ -155,6 +165,7 @@ def report_status(user_id, gps):
   if not user in recent_users:
     recent_users.append(user)
   return user.ping(datetime, loc, nearby_users, nearby_places)
+  
 
 def user_restart(user_id):
   if not(user_id in id2user):
@@ -228,7 +239,7 @@ def setup():
   print report_status(1,'$GPRMC,194309.000,A,3752.3229,N,12215.4703,W,2.03,221.11,260415,,,A*77') # Campanile
   print report_status(1,'$GPRMC,194419.000,A,3752.4825,N,12215.5181,W,2.03,221.11,260415,,,A*77') # Invention Lab
 
-  print report_status(2,'$GPRMC,194520.000,A,3752.5482,N,12215.5005,W,2.03,221.11,260415,,,A*77')
+  # print report_status(2,'$GPRMC,194520.000,A,3752.5482,N,12215.5005,W,2.03,221.11,260415,,,A*77')
   print report_status(1,'$GPRMC,194530.000,A,3752.5481,N,12215.5004,W,2.03,221.11,260415,,,A*77')
 
   # print report_status(2,'$GPRMC,194530.000,A,3752.5482,N,12215.7005,W,2.03,221.11,260415,,,A*77')

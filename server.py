@@ -35,6 +35,31 @@ def status():
     array = [random.randint(0,255) for i in xrange(64*3)]
     return ','.join(str(x) for x in array)
 
+# Another format to send GPS location (from iPhone)
+@app.route('/status2', methods=['GET','POST'])
+def status2():
+  if 'id' in request.form and 'lat' in request.form and 'long' in request.form:
+    user_id = int(request.form['id'])
+    update_user(int(request.form['id']), \
+                  [float(request.form['lat']), float(request.form['long'])])
+  return """
+  <!DOCTYPE html>
+  <html>
+  <body>
+    <form  method="post">
+      ID:<br>
+      <input type="text" name="id"><br>
+      Latitude:<br>
+      <input type="text" name="lat"><br>
+      Longtitude:<br>
+      <input type="text" name="long"><br>
+      <input type="submit" value="Submit" name="submit">
+    </form>
+    
+  </body>
+  </html>
+  """
+
 # Upload badge
 @app.route('/badge', methods=['GET','POST'])
 def badge():
