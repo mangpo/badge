@@ -35,13 +35,15 @@ def status():
     array = [random.randint(0,255) for i in xrange(64*3)]
     return ','.join(str(x) for x in array)
 
-# Another format to send GPS location (from iPhone)
-@app.route('/status2', methods=['GET','POST'])
-def status2():
+@app.route('/status2', methods=['POST'])
+def post_status2():
   if 'id' in request.form and 'lat' in request.form and 'long' in request.form:
     user_id = int(request.form['id'])
-    update_user(int(request.form['id']), \
-                  [float(request.form['lat']), float(request.form['long'])])
+    return update_user(int(request.form['id']), \
+                         [float(request.form['lat']), float(request.form['long'])])
+
+@app.route('/status2', methods=['GET'])
+def get_status2():
   return """
   <!DOCTYPE html>
   <html>

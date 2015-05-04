@@ -53,12 +53,16 @@ class User:
 
     # send one badge at a time
     if len(self.queue) > 0:
-      print "send badge to user %d" % (self.user_id)
+      print "send badge: case 1"
       tmp = self.queue[0]
       self.queue = self.queue[1:]
       return tmp
+    elif len(self.nearby) == 0:
+      print "send badge: case 2 (self)"
+      return self.badge
     else:
-      return "no new badge"
+      print "send badge: case 3 (last)"
+      return self.nearby[-1].badge
 
   def save_badge(self,badge):
     print "save_badge: id=", self.user_id
@@ -146,7 +150,7 @@ def report_status(user_id, gps):
     print "Invalid GPS data"
     return
 
-  update_user(user_id, parseGPS(gps)) # TODO
+  return update_user(user_id, parseGPS(gps))
 
 def update_user(user_id,loc):
   if not(user_id in id2user):
