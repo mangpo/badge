@@ -1,5 +1,5 @@
 from PIL import Image
-import random, time
+import random, time, os
 
 # User object represents either a user or a stationary place.
 # For staionary places, 
@@ -153,6 +153,10 @@ def report_status(user_id, gps):
   return update_user(user_id, parseGPS(gps))
 
 def update_user(user_id,loc):
+  o = open('log','a')
+  print >>o, user_id, loc
+  o.close()
+
   if not(user_id in id2user):
     id2user[user_id] = User(user_id)
   print ""
@@ -231,6 +235,8 @@ def create_place(id, loc, badge, message):
 
 def setup():
   print "set up..."
+  os.system('rm log')
+
   # Add stationary places from database "db/stationary.csv"
   f = open('db/stationary.csv','r')
   for row in f:
