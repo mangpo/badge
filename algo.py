@@ -157,6 +157,7 @@ def update_user(user_id,loc):
     id2user[user_id] = User(user_id)
   print ""
   print "ID = ", user_id
+  print "loc = ", loc
   user = id2user[user_id]
   datetime = get_datetime() # TODO
   global recent_users
