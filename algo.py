@@ -56,13 +56,13 @@ class User:
       print "send badge: case 1"
       tmp = self.queue[0]
       self.queue = self.queue[1:]
-      return tmp
+      return "1,0,0," + tmp
     elif len(self.nearby) == 0:
       print "send badge: case 2 (self)"
-      return self.badge
+      return "0,0,0," + self.badge
     else:
       print "send badge: case 3 (last)"
-      return self.nearby[-1].badge
+      return "0,0,0," + self.nearby[-1].badge
 
   def save_badge(self,badge):
     print "save_badge: id=", self.user_id
