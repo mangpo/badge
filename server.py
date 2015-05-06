@@ -2,7 +2,7 @@
 from flask import Flask
 from flask import request
 from algo import *
-import random
+import random, math
 
 app = Flask(__name__)
 setup()
@@ -18,22 +18,37 @@ def restart():
   else:
     return "Please specify user ID."
 
-# Upon receiving GPS location, 
-#   server will send one badge if there is a new nearby user/place.
-#   If there is no new user, server will send "no new badge".
-# If either 'id' or 'loc' argument is not specified, 
-#   server will return random 64x3 integers.
+@app.route('/status', methods=['POST'])
+def post_status():
+  if 'id' in request.form and 'lat' in request.form and 'long' in request.form:
+    lat = float(request.form['lat'])
+    lat = math.floor(lat/100) + (lat - 100*math.floor(lat/100))/60
+    lng = float(request.form['long'])
+    lng = math.floor(lng/100) + (lng - 100*math.floor(lng/100))/60
+    user_id = int(request.form['id'])
+    return update_user(int(request.form['id']), \
+                         [lat, lng])
+
 @app.route('/status', methods=['GET'])
-def status():
-  print 'args -------------'
-  print request.args
-  if 'id' in request.args and 'loc' in request.args:
-    user_id = int(request.args['id'])
-    loc = request.args['loc']
-    return report_status(user_id,loc)
-  else:
-    array = [random.randint(0,255) for i in xrange(64*3)]
-    return ','.join(str(x) for x in array)
+def get_status():
+  return """
+  <!DOCTYPE html>
+  <html>
+  <body>
+    <form  method="post">
+      ID:<br>
+      <input type="text" name="id"><br>
+      Latitude:<br>
+      <input type="text" name="lat"><br>
+      Longtitude:<br>
+      <input type="text" name="long"><br>
+      <input type="submit" value="Submit" name="submit">
+    </form>
+    
+  </body>
+  </html>
+  """
+
 
 @app.route('/status2', methods=['POST'])
 def post_status2():
