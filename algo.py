@@ -245,8 +245,8 @@ def setup():
   f.close()
 
   # Hard code for users 1 & 2's paths
-  print report_status(1,'$GPRMC,194119.000,A,3752.1984,N,12216.0867,W,2.03,221.11,260415,,,A*77') # BART
-  print report_status(1,'$GPRMC,194219.000,A,3752.26366,N,12215.71874,W,2.03,221.11,260415,,,A*77')
+  print update_user(1,[37.869154,-122.254792])
+  print update_user(1,[37.870748, -122.255835])
   print report_status(1,'$GPRMC,194309.000,A,3752.3229,N,12215.4703,W,2.03,221.11,260415,,,A*77') # Campanile
   print report_status(1,'$GPRMC,194419.000,A,3752.4825,N,12215.5181,W,2.03,221.11,260415,,,A*77') # Invention Lab
 
