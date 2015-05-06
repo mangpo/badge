@@ -7,6 +7,9 @@ import random, math
 app = Flask(__name__)
 setup()
 
+
+cache = ""
+
 # Upon receiving /restart?id=<id>, server will send the last badge back to arduino.
 # If there is no nearby user or place so far, server will send the user's own badge.
 @app.route('/restart', methods=['GET'])
@@ -17,17 +20,29 @@ def restart():
     return user_restart(user_id)
   else:
     return "Please specify user ID."
+  # print "RESTART"
+  # print cache
+  # global cache
+  # return cache
+
+def deg2decimal(x):
+  if x >= 0:
+    x = math.floor(x/100) + (x - 100*math.floor(x/100))/60
+  else:
+    x = -(math.floor(-x/100) + (-x - 100*math.floor(-x/100))/60)
+  return x
 
 @app.route('/status', methods=['POST'])
 def post_status():
   if 'id' in request.form and 'lat' in request.form and 'long' in request.form:
     lat = float(request.form['lat'])
-    lat = math.floor(lat/100) + (lat - 100*math.floor(lat/100))/60
     lng = float(request.form['long'])
-    lng = math.floor(lng/100) + (lng - 100*math.floor(lng/100))/60
     user_id = int(request.form['id'])
     return update_user(int(request.form['id']), \
-                         [lat, lng])
+                         [deg2decimal(lat), deg2decimal(lng)])
+  else:
+    print "malform"
+    return "malform"
 
 @app.route('/status', methods=['GET'])
 def get_status():
@@ -56,6 +71,9 @@ def post_status2():
     user_id = int(request.form['id'])
     return update_user(int(request.form['id']), \
                          [float(request.form['lat']), float(request.form['long'])])
+  else:
+    print "malform"
+    return "malform"
 
 @app.route('/status2', methods=['GET'])
 def get_status2():
