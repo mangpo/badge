@@ -251,14 +251,18 @@ def setup():
   f.close()
 
   # Hard code for users 1 & 2's paths
-  #print update_user(1,[37.869154,-122.254792]) # strada
+  update_user(1,[37.870905, -122.258770])
+  update_user(1,[37.871237, -122.258049])
+  update_user(1,[37.871989, -122.258083])
+  update_user(1,[37.872395, -122.258228])
+  update_user(1,[37.872730, -122.259236])
 
-  # update_user(1,[37.870905, -122.258770])
-  # update_user(1,[37.871237, -122.258049])
-  # update_user(1,[37.871989, -122.258083])
-  # update_user(1,[37.872395, -122.258228])
-  # update_user(1,[37.872730, -122.259236])
-  update_user(2,[0,0])
+  update_user(2,[37.869504,-122.251766])
+  update_user(2,[37.869154,-122.254792])
+  update_user(2,[37.870774,-122.255854])
+  update_user(2,[37.872052,-122.257798])
+  update_user(2,[37.874758,-122.258662])
+  #update_user(2,[37.874483,-122.257254])
 
 if __name__ == "__main__":
   setup()
