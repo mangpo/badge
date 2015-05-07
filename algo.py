@@ -8,7 +8,7 @@ import random, time, os
 class User:
   def __init__(self, user_id, \
                  message = "", \
-                 badge = ','.join(str(random.randint(0,255)) for x in xrange(64*3))):
+                 badge = ','.join(str(random.randint(0,255)) for x in xrange(64*3*2))):
     self.locations = []
     self.datetime = None
     self.user_id = user_id
@@ -18,15 +18,19 @@ class User:
     self.message = message
     self.queue = []
     self.generate_badge()
+    self.last_sent = None
 
   # Send the last badge back to arduino.
   # If there is no nearby user or place so far, server will send the user's own badge.
   def restart(self):
     if len(self.nearby) == 0:
-      return self.badge
+      return "0,0,0," + self.badge
     else:
-      print "restart: send badge id = ", self.nearby[-1].user_id
-      return self.nearby[-1].badge
+      if self.nearby[-1].badge == self.last_sent:
+        return "0,0,0," + self.nearby[-1].badge
+      else:
+        self.last_sent = self.nearby[-1].badge
+        return "1,0,0," + self.nearby[-1].badge
 
   # 1) Update user's location.
   # 2) Append nearby users and places to the nearby list, and add them to the queue.
@@ -180,7 +184,9 @@ def user_restart(user_id):
   if not(user_id in id2user):
     id2user[user_id] = User(user_id)
   user = id2user[user_id]
-  return user.restart()
+  ret = user.restart()
+  print ret
+  return ret
 
 def save_badge(user_id, badge):
   if not(user_id in id2user):
@@ -247,11 +253,12 @@ def setup():
   # Hard code for users 1 & 2's paths
   #print update_user(1,[37.869154,-122.254792]) # strada
 
-  update_user(1,[37.870905, -122.258770])
-  update_user(1,[37.871237, -122.258049])
-  update_user(1,[37.871989, -122.258083])
-  update_user(1,[37.872395, -122.258228])
-  update_user(1,[37.872730, -122.259236])
+  # update_user(1,[37.870905, -122.258770])
+  # update_user(1,[37.871237, -122.258049])
+  # update_user(1,[37.871989, -122.258083])
+  # update_user(1,[37.872395, -122.258228])
+  # update_user(1,[37.872730, -122.259236])
+  update_user(2,[0,0])
 
 if __name__ == "__main__":
   setup()
