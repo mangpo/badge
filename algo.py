@@ -247,11 +247,11 @@ def setup():
   # Hard code for users 1 & 2's paths
   #print update_user(1,[37.869154,-122.254792]) # strada
 
-  update_user(2,[37.870905, -122.258770])
-  update_user(2,[37.871237, -122.258049])
-  update_user(2,[37.871989, -122.258083])
-  update_user(2,[37.872395, -122.258228])
-  update_user(2,[37.872730, -122.259236])
+  update_user(1,[37.870905, -122.258770])
+  update_user(1,[37.871237, -122.258049])
+  update_user(1,[37.871989, -122.258083])
+  update_user(1,[37.872395, -122.258228])
+  update_user(1,[37.872730, -122.259236])
 
 if __name__ == "__main__":
   setup()
