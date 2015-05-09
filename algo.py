@@ -239,17 +239,7 @@ def create_place(id, loc, badge, message):
   user.ping(None, loc, [], [])
   stationary.append(user)
 
-def setup():
-  print "set up..."
-  os.system('rm log')
-
-  # Add stationary places from database "db/stationary.csv"
-  f = open('db/stationary.csv','r')
-  for row in f:
-    tokens = row.split(';')
-    create_place(int(tokens[0]), [float(tokens[2]),float(tokens[3])], tokens[4], tokens[1])
-  f.close()
-
+def preprograms_paths():
   # Hard code for users 1 & 2's paths
   update_user(1,[37.870905, -122.258770])
   update_user(1,[37.871237, -122.258049])
@@ -262,11 +252,20 @@ def setup():
   update_user(2,[37.870774,-122.255854])
   update_user(2,[37.872052,-122.257798])
   update_user(2,[37.874758,-122.258662])
-  #update_user(2,[37.874483,-122.257254])
+
+def setup():
+  print "set up..."
+  os.system('rm log')
+
+  # Add stationary places from database "db/stationary.csv"
+  f = open('db/stationary.csv','r')
+  for row in f:
+    tokens = row.split(';')
+    create_place(int(tokens[0]), [float(tokens[2]),float(tokens[3])], tokens[4], tokens[1])
+  f.close()
+
+  #preprograms_paths()
+  print "done set up."
 
 if __name__ == "__main__":
   setup()
-  user = id2user[1]
-  print user.locations
-  print user.nearby
-  print user.nearby_loc

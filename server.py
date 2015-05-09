@@ -7,9 +7,6 @@ import random, math
 app = Flask(__name__)
 setup()
 
-
-cache = ""
-
 # Upon receiving /restart?id=<id>, server will send the last badge back to arduino.
 # If there is no nearby user or place so far, server will send the user's own badge.
 @app.route('/restart', methods=['GET'])
@@ -20,10 +17,6 @@ def restart():
     return user_restart(user_id)
   else:
     return "Please specify user ID."
-  # print "RESTART"
-  # print cache
-  # global cache
-  # return cache
 
 def deg2decimal(x):
   if x >= 0:
@@ -32,6 +25,7 @@ def deg2decimal(x):
     x = -(math.floor(-x/100) + (-x - 100*math.floor(-x/100))/60)
   return x
 
+# For reporting GPS location in degree minute format.
 @app.route('/status', methods=['POST'])
 def post_status():
   if 'id' in request.form and 'lat' in request.form and 'long' in request.form:
@@ -44,6 +38,7 @@ def post_status():
     print "malform"
     return "malform"
 
+# For reporting GPS location in degree minute format.
 @app.route('/status', methods=['GET'])
 def get_status():
   return """
@@ -64,7 +59,7 @@ def get_status():
   </html>
   """
 
-
+# For reporting GPS location in decimal format.
 @app.route('/status2', methods=['POST'])
 def post_status2():
   if 'id' in request.form and 'lat' in request.form and 'long' in request.form:
@@ -75,6 +70,7 @@ def post_status2():
     print "malform"
     return "malform"
 
+# For reporting GPS location in decimal format.
 @app.route('/status2', methods=['GET'])
 def get_status2():
   return """
@@ -144,41 +140,6 @@ def message():
 def map():
   user_id = int(request.args['id'])
   return get_map(user_id)
-
-# request.form
-# ImmutableMultiDict([('badge', u'1,2,2,3'), ('submit', u'Submit')])
-@app.route('/test', methods=['GET','POST'])
-def test():
-  print 'get_data -------------'
-  print len(request.get_data())
-  print 'args -------------'
-  print request.args
-  print 'files -------------'
-  print request.files
-  print 'data -------------'
-  print len(request.data)
-  print 'form -------------'
-  print request.form
-  print 'encoding -------------'
-  print request.content_encoding
-  print request.content_length
-  print request.content_type
-  print 'host -------------'
-  print request.host
-  print '-------------'
-  return """
-  <!DOCTYPE html>
-  <html>
-  <body>
-    <form  method="post">
-      Sequence of 64 x 3:<br>
-      <input type="text" name="badge" size="100"><br>
-      <input type="submit" value="Submit" name="submit">
-    </form>
-    
-  </body>
-  </html>
-  """
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5001, debug=True)

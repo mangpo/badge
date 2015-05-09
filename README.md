@@ -15,3 +15,7 @@ To run the server in debug mode, type:
 ```
 python server.py
 ```
+To run the server in production mode (with multiple threads), type:
+```
+uwsgi --ini uwsgi.ini
+```
